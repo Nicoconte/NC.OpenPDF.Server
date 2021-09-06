@@ -19,6 +19,8 @@ from uuid import uuid4
 
 import json
 
+storage = Storage()
+
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @api_view(["POST"])
@@ -36,9 +38,10 @@ def merge_pdf(request):
     # Process user from token
     token = get_token_from_request(request)
     user  = get_user_by_token(token)
+    storage.init(user.username)
 
     # Build output path for pdf file
-    output_path = Storage.build_path(user.username) 
+    output_path = storage.full_path 
     
     pdf = PDF(output_path)
     
@@ -52,7 +55,7 @@ def merge_pdf(request):
     # Merge them
     saved = pdf.merge(pdf_paths, filename)
 
-    fileObj = FileService.save(user, filename, output_path)
+    fileObj = FileService.save(user, filename, output_path, storage)
 
     if saved:
         return Response({
@@ -80,9 +83,10 @@ def encrypt_pdf(request):
     # Process user from token
     token = get_token_from_request(request)
     user  = get_user_by_token(token)
+    storage.init(user.username)   
 
     # Build output path for pdf file
-    output_path = Storage.build_path(user.username) 
+    output_path = storage.full_path
     
     pdf = PDF(output_path)
     
@@ -96,7 +100,7 @@ def encrypt_pdf(request):
     encrypted = pdf.encrypt(output_path, password, new_filename)
     
     #Save and use ID to download Output PDF file. After operation, we'll be deleting it 
-    fileObj = FileService.save(user, new_filename, output_path) 
+    fileObj = FileService.save(user, new_filename, output_path, storage) 
 
     if encrypted:
         return Response({
@@ -124,9 +128,10 @@ def convert_img_to_pdf(request):
     # Process user from token
     token = get_token_from_request(request)
     user  = get_user_by_token(token)
+    storage.init(user.username)
 
     # Build output path for pdf file
-    output_path = Storage.build_path(user.username) 
+    output_path = storage.full_path 
 
     images_path = FileService.build_files_fullpath(images_id)
 
@@ -136,7 +141,7 @@ def convert_img_to_pdf(request):
     image = Image(output_path)
     converted = image.convert_to_pdf(images_path, filename)
 
-    fileObj = FileService.save(user, filename, output_path)
+    fileObj = FileService.save(user, filename, output_path, storage)
 
     if converted:
         return Response({

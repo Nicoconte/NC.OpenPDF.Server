@@ -67,4 +67,22 @@ class Storage:
         for file in files:
             size += os.path.getsize(f"{self.full_path}/{file}")
 
-        return size // (1024*1024) 
+        return size // (1024**2) 
+
+    def calculate_file_size(self, filename):
+        file = f"{self.full_path}/{filename}"
+        size = os.path.getsize(file)
+        return size // (1024**2)
+
+    def get_file_extension(self, filename):
+        index = []
+        for i in range(len(filename)):
+            if filename[i] == ".":
+                index.append(i)
+        
+        extension = ""
+
+        for i in range(index[len(index) - 1], len(filename)):
+            extension += filename[i]
+
+        return f"{extension}"

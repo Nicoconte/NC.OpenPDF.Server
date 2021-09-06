@@ -9,6 +9,8 @@ class File(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     filename = models.CharField(max_length=100)
     path = models.CharField(max_length=100)
+    size = models.IntegerField(default=0)
+    extension = models.CharField(max_length=100, default='')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

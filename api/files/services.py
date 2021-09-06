@@ -5,11 +5,13 @@ class FileService:
 
 
     @staticmethod
-    def save(user, filename, path):
+    def save(user, filename, path, storage):
         file = File.objects.create(
-            user = user,
-            filename = filename,
-            path = path    
+            user       = user,
+            filename   = filename,
+            path       = path,
+            extension  = storage.get_file_extension(filename),
+            size       = storage.calculate_file_size(filename)
         )
         
         return file if file is not None else None
@@ -25,16 +27,20 @@ class FileService:
             #TODO: Seria mejor que un servicio se encargue de esto?            
             try:
                 fileObj = File.objects.create(
-                    user     = user,
-                    filename = filename,
-                    path     = storage.full_path 
+                    user      = user,
+                    filename  = filename,
+                    path      = storage.full_path,
+                    extension = storage.get_file_extension(filename),
+                    size      = FileService.get_single_blob_file_size(file)  
                 )
 
                 success.append({
                     "id": fileObj.id,
-                    "filename": fileObj.filename.lower(),
-                    "extension": fileObj.filename.split(".")[1],
-                    "path": fileObj.path
+                    "filename": fileObj.filename,
+                    "extension": fileObj.extension,
+                    "path": fileObj.path,
+                    "size": fileObj.size,
+                    "uploaded_at": fileObj.uploaded_at
                 })
                 
             except Exception as e:
@@ -91,5 +97,9 @@ class FileService:
 
 
     @staticmethod
-    def calculate_files_size(files):
+    def get_blob_files_size(files):
         return sum([f.size for f in files]) // (1024 ** 2)
+
+    @staticmethod
+    def get_single_blob_file_size(file):
+        return file.size // (1024 ** 2)    

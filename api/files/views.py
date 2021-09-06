@@ -35,7 +35,7 @@ def upload_file(request):
     token = get_token_from_request(request)
     user  = get_user_by_token(token)    
 
-    files_size = FileService.calculate_files_size(files)
+    files_size = FileService.get_blob_files_size(files)
 
     if not DiskSpaceService.is_there_space_into_the_disk(user, files_size):
         return Response({
@@ -113,16 +113,14 @@ def list_files(request):
     file_response = []
 
     for file in files:
-        fileinfo = file.filename.split('.')
-        
-        name = fileinfo[0]
-        extension = fileinfo[1]
-
+       
         file_response.append({
             "id": file.id,
-            "filename": name,
-            "extension": extension,
-            "path": file.path
+            "filename": file.filename,
+            "extension": file.extension,
+            "path": file.path,
+            "size": file.size,
+            "uploaded_at": file.uploaded_at
         })
 
     return Response({
