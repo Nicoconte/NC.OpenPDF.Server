@@ -15,7 +15,14 @@ class Storage:
 
         if foldername != None:
             self.full_path = f"{settings.MEDIA_ROOT}{foldername}"
-            self.fileSystem = FileSystemStorage(self.full_path)    
+            self.fileSystem = FileSystemStorage(self.full_path) 
+
+    def __get_dot_index(self, string: str):
+        index = []
+        for i in range(len(string)):
+            if string[i] == ".":
+                index.append(i)
+        return index
 
     def init(self, foldername):
         self.foldername = foldername
@@ -74,11 +81,9 @@ class Storage:
         size = os.path.getsize(file)
         return size // (1024**2)
 
+
     def get_file_extension(self, filename):
-        index = []
-        for i in range(len(filename)):
-            if filename[i] == ".":
-                index.append(i)
+        index = self.__get_dot_index(filename)
         
         extension = ""
 
@@ -86,3 +91,12 @@ class Storage:
             extension += filename[i]
 
         return f"{extension}"
+    
+    def normalize_filename(self, filename: str):
+        index = self.__get_dot_index(filename)
+        filename_normalized = ""
+
+        for i in range(0, index[len(index) - 1]):
+            filename_normalized += filename[i]
+        
+        return filename_normalized
